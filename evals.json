@@ -1,0 +1,163 @@
+{
+  "skill_name": "reddit-to-pr",
+  "version": "1.0.0",
+  "evals": [
+    {
+      "id": "setup-mode-complete-flow",
+      "prompt": "I want to set up the reddit-to-pr skill for my project",
+      "assertions": [
+        {
+          "id": "asks-subreddits",
+          "description": "Should ask for target subreddits",
+          "type": "output_contains",
+          "value": "subreddits should I monitor",
+          "weight": 1
+        },
+        {
+          "id": "asks-product-description",
+          "description": "Should ask for product description",
+          "type": "output_contains",
+          "value": "Describe your product",
+          "weight": 1
+        },
+        {
+          "id": "asks-repo-path",
+          "description": "Should ask for repository path",
+          "type": "output_contains",
+          "value": "path to your code repository",
+          "weight": 1
+        },
+        {
+          "id": "saves-config",
+          "description": "Should save configuration to config.json",
+          "type": "process",
+          "value": "Creates config.json with setupComplete: true",
+          "weight": 2
+        }
+      ]
+    },
+    {
+      "id": "execution-mode-successful-pr",
+      "prompt": "Check Reddit for issues with my web app and ship a fix",
+      "assertions": [
+        {
+          "id": "loads-config",
+          "description": "Should load existing configuration",
+          "type": "process",
+          "value": "Reads config.json from base directory",
+          "weight": 1
+        },
+        {
+          "id": "searches-reddit",
+          "description": "Should search Reddit for complaints",
+          "type": "output_contains",
+          "value": "searching Reddit",
+          "weight": 1
+        },
+        {
+          "id": "creates-branch",
+          "description": "Should create a fix branch",
+          "type": "output_contains",
+          "value": "fix/reddit-",
+          "weight": 1
+        },
+        {
+          "id": "opens-pr",
+          "description": "Should open a pull request",
+          "type": "output_contains",
+          "value": "gh pr create",
+          "weight": 2
+        }
+      ]
+    },
+    {
+      "id": "insufficient-evidence-report",
+      "prompt": "Find Reddit complaints about my CLI tool and fix them",
+      "assertions": [
+        {
+          "id": "research-report",
+          "description": "Should output research report when evidence insufficient",
+          "type": "output_contains",
+          "value": "Research Report",
+          "weight": 2
+        },
+        {
+          "id": "no-fabrication",
+          "description": "Should not fabricate quotes or fixes",
+          "type": "output_not_contains",
+          "value": "fix/reddit-",
+          "weight": 2
+        },
+        {
+          "id": "includes-assessment",
+          "description": "Report should include evidence assessment",
+          "type": "output_contains",
+          "value": "Evidence strength",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "reconfigure-existing-setup",
+      "prompt": "Reconfigure my reddit-to-pr settings",
+      "assertions": [
+        {
+          "id": "enters-setup-mode",
+          "description": "Should enter setup mode when asked to reconfigure",
+          "type": "output_contains",
+          "value": "subreddits should I monitor",
+          "weight": 2
+        },
+        {
+          "id": "asks-all-questions",
+          "description": "Should ask all setup questions in sequence",
+          "type": "quality",
+          "value": "Asks for subreddits, product description, repo path, keywords, schedule, and results destination",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "id": "slack-notification-setup",
+      "prompt": "Set up reddit-to-pr to post results to Slack",
+      "assertions": [
+        {
+          "id": "asks-webhook",
+          "description": "Should ask for Slack webhook URL when destination is Slack",
+          "type": "output_contains",
+          "value": "webhook URL",
+          "weight": 2
+        },
+        {
+          "id": "stores-webhook",
+          "description": "Should store webhook in configuration",
+          "type": "process",
+          "value": "Saves slackWebhook to config.json",
+          "weight": 1
+        }
+      ]
+    }
+  ],
+  "trigger_evals": {
+    "should_trigger": [
+      "check reddit for issues",
+      "reddit to pr",
+      "find user pain points on Reddit",
+      "scan Reddit for complaints about our product",
+      "ship fixes based on Reddit feedback",
+      "monitor subreddits for user issues",
+      "create PRs from Reddit complaints",
+      "automate fixing Reddit-reported bugs"
+    ],
+    "should_not_trigger": [
+      "how to cook pasta",
+      "weather forecast for tomorrow",
+      "latest news headlines",
+      "help me with my math homework",
+      "write a poem about nature",
+      "schedule a team meeting",
+      "book a flight to Paris",
+      "recommend a good restaurant"
+    ]
+  }
+}
