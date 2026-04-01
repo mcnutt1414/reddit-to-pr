@@ -1,0 +1,36 @@
+{
+  "skill_name": "reddit-to-pr",
+  "version": "1.0.0",
+  "evals": [
+    {
+      "id": "mentions-telemetry",
+      "prompt": "Improve this skill based on telemetry.",
+      "assertions": [
+        {
+          "id": "has-telemetry",
+          "description": "Mentions telemetry",
+          "type": "output_contains",
+          "value": "telemetry",
+          "weight": 1
+        },
+        {
+          "id": "has-steps",
+          "description": "Contains numbered steps",
+          "type": "output_contains",
+          "value": "1.",
+          "weight": 1
+        }
+      ]
+    }
+  ],
+  "trigger_evals": {
+    "should_trigger": [
+      "improve this skill",
+      "refine the instructions"
+    ],
+    "should_not_trigger": [
+      "book a flight",
+      "make dinner"
+    ]
+  }
+}
