@@ -4,6 +4,12 @@ description: >-
   Use when asked to find Reddit complaints about a product and ship fixes,
   when asked to "check reddit for issues", "reddit to pr", "find user pain
   points", or on a schedule to improve a product based on real user feedback
+metrics:
+  enabled: true
+view:
+  enabled: true
+  renderer: json-render
+  components: [Card, Stack, Grid, Heading, Text, Badge, Table, Progress, Separator, Alert]
 ---
 
 # Reddit to PR
@@ -182,3 +188,124 @@ When evidence is insufficient for a fix, output this instead:
 ### Recommendations
 {What to monitor, what might become actionable with more evidence}
 ```
+
+## View
+
+This skill tracks operational metrics and can present them using the Forge UI
+component catalog. When the client includes a `=== RENDER CONTEXT ===` block,
+read its declared capabilities and choose the best supported format. If
+`json-render` is supported, emit a spec and still include a markdown fallback
+after it.
+
+### Tracked Metrics
+
+- posts_screened (counter): Total Reddit posts evaluated across all runs
+- prs_created (counter): Total PRs opened from validated issues
+- prs_merged (counter): PRs that have been merged into main
+- prs_open (list): Currently open PRs — title, url, status, created date
+- issues_watching (counter): Issues flagged but not yet actionable
+- last_run (timestamp): When the skill last executed
+
+### Component Catalog
+
+The following components are available for rich UI output. Emit a json-render
+spec using these types only — no HTML tags, no lowercase types, no `div`/`p`/`h1`.
+
+| Component | Purpose | Common Composition |
+|-----------|---------|--------------------|
+| Card      | Container with title/description | Card > Heading for KPIs |
+| Stack     | Vertical or horizontal layout | Lists, status rows |
+| Grid      | Multi-column layout | KPI rows, dashboards |
+| Heading   | Large title or display text | KPI numbers (use `text` prop) |
+| Text      | Body copy and labels | Descriptions (use `text` prop) |
+| Badge     | Status indicator | Success/warning/failure (use `text` prop) |
+| Table     | Tabular data | Lists with columns |
+| Progress  | Completion and fill metrics | Progress bars |
+| Separator | Dividers | Section breaks |
+| Alert     | Important notices | Warnings, errors |
+
+### Spec Format
+
+When `json-render` is supported, output a json-render spec as a JSON code block
+in your response. The spec uses the standard json-render element tree format
+with a `root` key and an `elements` map. Children are arrays of element keys
+(strings), not nested objects.
+
+```json
+{
+  "root": "dashboard",
+  "elements": {
+    "dashboard": {
+      "type": "Grid",
+      "props": { "columns": 3 },
+      "children": ["posts", "prs", "status"]
+    },
+    "posts": {
+      "type": "Card",
+      "props": { "title": "Posts Screened" },
+      "children": ["posts-value"]
+    },
+    "posts-value": {
+      "type": "Heading",
+      "props": { "text": "47" }
+    },
+    "prs": {
+      "type": "Card",
+      "props": { "title": "PRs Created" },
+      "children": ["prs-value"]
+    },
+    "prs-value": {
+      "type": "Heading",
+      "props": { "text": "12" }
+    },
+    "status": {
+      "type": "Card",
+      "props": { "title": "Status" },
+      "children": ["status-badge"]
+    },
+    "status-badge": {
+      "type": "Badge",
+      "props": { "text": "Healthy" }
+    }
+  }
+}
+```
+
+Use composition patterns:
+- **KPI block**: `Card` with a nested `Heading` child for the value
+- **Status row**: `Stack` (horizontal) containing a `Text` label and a `Badge`
+- **Dashboard layout**: `Grid` with `columns: 2-4` containing Card children
+
+### Plain Text Fallback
+
+When `json-render` is not in the Render Context capabilities, or when responding
+conversationally, present metrics as plain text or markdown:
+
+```
+Posts Screened: 47
+PRs Created: 12
+PRs Merged: 8
+PRs Open: 3
+Status: Healthy
+```
+
+Always include this markdown fallback after a json-render spec so text-only
+clients still see something readable.
+
+### Capability Negotiation
+
+Read the system prompt for a block that looks like:
+
+```
+=== RENDER CONTEXT ===
+surface: web
+capabilities:
+  - json-render
+  - shadcn
+  - markdown
+=== END RENDER CONTEXT ===
+```
+
+- If `json-render` is present → emit a spec followed by a markdown fallback
+- If only `markdown` is present → respond in markdown
+- If neither is present → use plain text
